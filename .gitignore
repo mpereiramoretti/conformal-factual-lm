@@ -7,3 +7,5 @@ venv
 .idea
 
 venv-cf/*
+venv-cf-2/*
+*/__pycache__/*
