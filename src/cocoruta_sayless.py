@@ -23,6 +23,10 @@ def get_tokenizer_and_model(model_id, device_map, torch_dtype):
     return tokenizer, model
 
 
+def build_prompt(question):
+    return f"### Pergunta: {question}\n### Resposta:"
+
+
 def query_model(model, tokenizer, prompt, max_tokens=1000, temperature=0, n_samples=1):
     # Define an early stopping ccriteria
     class StopOnString(StoppingCriteria):
@@ -66,10 +70,17 @@ def query_model(model, tokenizer, prompt, max_tokens=1000, temperature=0, n_samp
     else:
         raise ValueError("Temperature must be >= 0")
 
+    # Remove the prompt part
+    generated_ids = _[:, input_ids.shape[-1] :]
+
+    # Decode only the generated tokens
     return (
-        tokenizer.decode(_[0], skip_special_tokens=True)
+        tokenizer.decode(generated_ids[0], skip_special_tokens=True)
         if n_samples == 1
-        else [tokenizer.decode(choice, skip_special_tokens=True) for choice in _]
+        else [
+            tokenizer.decode(choice, skip_special_tokens=True)
+            for choice in generated_ids
+        ]
     )
 
 
